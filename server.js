@@ -1,6 +1,8 @@
 import express from "express";
 import morgan from "morgan";
 import dotenv from "dotenv";
+import shopifyRoutes from "./shopify.js";
+
 
 dotenv.config();
 
@@ -48,8 +50,10 @@ app.get("/api/dbtest", async (_req, res) => {
 app.get("/api/status", (_req, res) => {
   res.json({ ok: true });
 });
+app.use("/api/shopify", shopifyRoutes);
 
 const port = process.env.PORT || 8080;
 app.listen(port, () => console.log(`✅ Server running on port ${port}`));
+
 
 

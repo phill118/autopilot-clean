@@ -18,14 +18,31 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Simple API route to test the connection
 app.get("/api/dbtest", async (_req, res) => {
   try {
-    // Just ask Supabase who we are
-    const { data, error } = await supabase.from("pg_tables").select("tablename").limit(1);
-    if (error) throw error;
-    res.json({ ok: true, message: "Database connection working!" });
+    // Try inserting a row
+    const { error: insertError } = await supabase
+      .from("test_table")
+      .insert({ message: "Hello from the server!" });
+
+    if (insertError) throw insertError;
+
+    // Read back the latest row
+    const { data, error: selectError } = await supabase
+      .from("test_table")
+      .select("*")
+      .order("id", { ascending: false })
+      .limit(1);
+
+    if (selectError) throw selectError;
+
+    res.json({ ok: true, message: "Database test succeeded", data });
   } catch (err) {
-    res.status(500).json({ ok: false, error: String(err) });
+    res.status(500).json({
+      ok: false,
+      error: err.message || JSON.stringify(err)
+    });
   }
 });
+
 
 // --- BASIC STATUS ROUTE ---
 app.get("/api/status", (_req, res) => {
@@ -34,4 +51,5 @@ app.get("/api/status", (_req, res) => {
 
 const port = process.env.PORT || 8080;
 app.listen(port, () => console.log(`✅ Server running on port ${port}`));
+
 
